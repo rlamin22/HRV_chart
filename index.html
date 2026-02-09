@@ -1,0 +1,143 @@
+    <!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRV & 활동량 분석 그래프</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .chart-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 800px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="chart-container">
+    <h2>일일 활동량 및 HRV 패턴</h2>
+    <canvas id="bioChart"></canvas>
+</div>
+
+<script>
+    const ctx = document.getElementById('bioChart').getContext('2d');
+
+    // 가상의 데이터 (0시 ~ 23시)
+    // 활동량이 높을 때 HRV가 일시적으로 낮아지고, 휴식 시 회복되는 패턴을 반영
+    const hours = Array.from({length: 24}, (_, i) => `${i}시`);
+    
+    // 활동량 데이터 (걸음 수 또는 강도)
+    const activityData = [
+        0, 0, 0, 0, 0, 0,  // 수면 (0-5시)
+        10, 30, 80, 45, 20, 30, // 아침 활동
+        60, 40, 25, 20, 90, 85, // 오후/저녁 운동
+        50, 20, 10, 5, 0        // 휴식 및 취침 준비
+    ];
+
+    // HRV 데이터 (ms) - 활동량과 반비례하는 경향 + 수면 시 상승
+    const hrvData = [
+        75, 78, 80, 82, 80, 75, // 수면 (높음)
+        60, 50, 35, 45, 55, 50, // 아침 활동 (낮아짐)
+        40, 50, 55, 60, 30, 32, // 운동 (급격히 낮아짐)
+        45, 60, 65, 70, 72      // 회복 (상승)
+    ];
+
+    const bioChart = new Chart(ctx, {
+        type: 'bar', // 기본 타입
+        data: {
+            labels: hours,
+            datasets: [
+                {
+                    label: '활동량 (Activity Level)',
+                    data: activityData,
+                    backgroundColor: '#429C34', // 요청하신 초록색
+                    borderRadius: 4, // 막대 둥글게
+                    order: 2, // 뒤쪽에 배치
+                    yAxisID: 'y',
+                },
+                {
+                    label: 'HRV (ms)',
+                    data: hrvData,
+                    type: 'line', // 꺾은선 그래프로 변경
+                    borderColor: '#2C3E50', // 짙은 남색 (대조색)
+                    backgroundColor: 'rgba(44, 62, 80, 0.1)',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#2C3E50',
+                    pointRadius: 4,
+                    tension: 0.4, // 곡선 부드럽게
+                    order: 1, // 앞쪽에 배치
+                    yAxisID: 'y1',
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    enabled: true
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: false // X축 그리드 숨김 (깔끔하게)
+                    }
+                },
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: '활동량 강도'
+                    },
+                    grid: {
+                        display: false
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'HRV (ms)'
+                    },
+                    grid: {
+                        borderDash: [5, 5], // 점선 그리드
+                        color: '#e0e0e0'
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
